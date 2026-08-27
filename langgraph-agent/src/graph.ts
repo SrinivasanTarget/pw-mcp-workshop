@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { spawnSync } from "node:child_process";
 import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -175,13 +176,43 @@ export function buildGraph(
     return { results };
   }
 
+  /** Node 4 (stage 06 solution) - prove the generated specs actually pass:
+   *  run exactly those files through the Playwright runner. No LLM involved -
+   *  the pipeline's word is only as good as a green run. */
+  async function verifyTests(state: AgentStateType) {
+    const files = state.scenarios.map((s) => path.normalize(s.file));
+    if (files.length === 0) {
+      return { results: ["verify_tests: nothing to run"] };
+    }
+    console.log(`[verify_tests] running ${files.length} generated spec(s)`);
+    const run = spawnSync(
+      "npx",
+      ["playwright", "test", ...files, "--reporter=list"],
+      { cwd: REPO_ROOT, encoding: "utf8", env: { ...process.env, CI: "1" } }
+    );
+    const passed = run.status === 0;
+    const tail = (run.stdout ?? "").trim().split("\n").slice(-10).join("\n");
+    if (!passed) process.exitCode = 1;
+    return {
+      results: [
+        (passed
+          ? "✅ verify_tests: all generated specs pass"
+          : "❌ verify_tests: failures remain (process will exit non-zero)") +
+          "\n" +
+          tail,
+      ],
+    };
+  }
+
   return new StateGraph(AgentState)
     .addNode("fetch_issue", fetchIssue)
     .addNode("plan_tests", planTests)
     .addNode("generate_tests", generateTests)
+    .addNode("verify_tests", verifyTests)
     .addEdge(START, "fetch_issue")
     .addEdge("fetch_issue", "plan_tests")
     .addEdge("plan_tests", "generate_tests")
-    .addEdge("generate_tests", END)
+    .addEdge("generate_tests", "verify_tests")
+    .addEdge("verify_tests", END)
     .compile();
 }
