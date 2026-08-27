@@ -46,6 +46,23 @@ tests; reach for `playwright-network-mocking`, `playwright-api-testing`,
 `playwright-debugging`, `playwright-bug-hunting`, `playwright-fixtures-auth`,
 and `playwright-trace` when the task matches.
 
+## Test Agents (this stage)
+
+Planner / generator / healer agents are wired for both clients
+(`.claude/agents/` and `.opencode/prompts/` + `opencode.json`). Their engine
+is the `playwright-test` MCP server; every `browser_*` call there must run
+inside a set-up test (`planner_setup_page` / `generator_setup_page` first)
+and takes an `intent` argument. Guardrails:
+
+- `tests/seed.spec.ts` stays **active and empty** - never edit it, never
+  import it from `tests/fixtures.ts`.
+- The planner writes plans to `specs/`; the generator implements plans as
+  specs; the healer edits only failing specs, minimally.
+- If a failure looks like changed app behaviour (not a stale selector), stop
+  and flag it for human review instead of rewriting the expectation.
+- Never mix the two MCP servers in one manual flow - separate browsers, no
+  shared state.
+
 ## Repo conventions
 
 - `tests/fixtures.ts` extends `test` with an auto network-evidence fixture;
