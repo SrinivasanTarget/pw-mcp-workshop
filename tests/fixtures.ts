@@ -38,14 +38,14 @@ export const test = base.extend<{ _networkEvidence: void }>({
       page.on('requestfailed', (request) => {
         if (entries.length >= MAX_ENTRIES) return;
         const reason = request.failure()?.errorText ?? 'request failed';
-        entries.push(`${request.method()} ${request.url()} — ${reason}${originLabel(request.url())}`);
+        entries.push(`${request.method()} ${request.url()} - ${reason}${originLabel(request.url())}`);
       });
 
       page.on('response', (response) => {
         if (entries.length >= MAX_ENTRIES) return;
         if (response.status() >= 400) {
           entries.push(
-            `${response.request().method()} ${response.url()} — HTTP ${response.status()}${originLabel(response.url())}`
+            `${response.request().method()} ${response.url()} - HTTP ${response.status()}${originLabel(response.url())}`
           );
         }
       });
