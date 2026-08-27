@@ -37,6 +37,15 @@ ceremony, `browser_navigate` works immediately. `browser_run_code_unsafe` is
 denied by policy. When asked to explore or verify the app, prefer `browser_*`
 tools over guessing from source.
 
+## Skills (this stage)
+
+House-style playbooks live in `.claude/skills/` and are shared by both clients
+(OpenCode discovers `.claude/skills/*/SKILL.md` natively). Read
+`test-craftsmanship` and `playwright-locators` before writing or refactoring
+tests; reach for `playwright-network-mocking`, `playwright-api-testing`,
+`playwright-debugging`, `playwright-bug-hunting`, `playwright-fixtures-auth`,
+and `playwright-trace` when the task matches.
+
 ## Repo conventions
 
 - `tests/fixtures.ts` extends `test` with an auto network-evidence fixture;
