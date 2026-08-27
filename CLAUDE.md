@@ -63,6 +63,16 @@ and takes an `intent` argument. Guardrails:
 - Never mix the two MCP servers in one manual flow - separate browsers, no
   shared state.
 
+## Playwright CLI (this stage)
+
+`npm run cli -- <command>` (alias for `npx playwright cli`) drives a live
+browser from the terminal - open/snapshot/find/click/fill, video with
+chapters, traces. The `playwright-cli` skill is the reference. Prefer it over
+the MCP for quick one-off pokes and for scripted, repeatable sessions
+(`scripts/`). Session scratch lives in `.playwright-cli/` (gitignored). In
+this repo pass CSS `[data-test=...]` selectors or roles/labels - the
+standalone CLI does not read `testIdAttribute` from the config.
+
 ## Repo conventions
 
 - `tests/fixtures.ts` extends `test` with an auto network-evidence fixture;

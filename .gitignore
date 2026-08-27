@@ -15,3 +15,6 @@ node_modules/
 # Env & local per-user overrides
 .env
 .claude/settings.local.json
+
+# Playwright CLI scratch (sessions, snapshots)
+.playwright-cli/

@@ -15,7 +15,8 @@
     "report": "playwright show-report",
     "codegen": "playwright codegen https://playwright-workshop.pages.dev/login",
     "typecheck": "tsc --noEmit",
-    "install:browsers": "playwright install chromium"
+    "install:browsers": "playwright install chromium",
+    "cli": "playwright cli"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
