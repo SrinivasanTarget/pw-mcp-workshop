@@ -1,40 +1,24 @@
 import { test, expect } from '../fixtures';
+import { loginAs } from '../support/session';
 
 test.describe('Guest Checkout', () => {
   test('Successful checkout - single item', async ({ page }) => {
-    // Start at the inventory (redirects to /login when unauthenticated)
-    await page.goto('/inventory');
+    await loginAs(page);
 
-    // App requires authentication before inventory is reachable
-    await page.locator('[data-test="username"]').fill('standard_user');
-    await page.locator('[data-test="password"]').fill('workshop123');
-    await page.locator('[data-test="login-submit"]').click();
-
-    // Click the 'Add to cart' button on the Workshop Backpack item
-    await page.locator('[data-test="add-p-001"]').click();
-
-    // Click the 'Cart' link in the header
+    // Add the Workshop Backpack and open the cart
+    await page.getByTestId('add-p-001').click();
     await page.getByRole('link', { name: /^Cart/ }).click();
 
-    // Click the 'Checkout' button
-    await page.locator('[data-test="checkout"]').click();
+    // Check out with a complete address
+    await page.getByTestId('checkout').click();
+    await page.getByTestId('firstName').fill('Ada');
+    await page.getByTestId('lastName').fill('Lovelace');
+    await page.getByTestId('zip').fill('00001');
+    await page.getByTestId('place-order').click();
 
-    // Fill the First name field with 'Ada'
-    await page.locator('[data-test="firstName"]').fill('Ada');
-
-    // Fill the Last name field with 'Lovelace'
-    await page.locator('[data-test="lastName"]').fill('Lovelace');
-
-    // Fill the ZIP field with '00001'
-    await page.locator('[data-test="zip"]').fill('00001');
-
-    // Click the 'Place order' button
-    await page.locator('[data-test="place-order"]').click();
-
-    // Verify the heading 'Thanks for your order' is visible
-    await expect(page.locator('[data-test="thank-you"]')).toBeVisible();
-
-    // Verify the 'Continue shopping' link is visible
-    await expect(page.getByRole('link', { name: 'Continue shopping' })).toBeVisible();
+    await expect(page.getByTestId('thank-you')).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Continue shopping' })
+    ).toBeVisible();
   });
 });
