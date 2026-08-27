@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "playwright",
+        "mcp",
+        "--caps",
+        "vision,pdf,devtools,network,storage,testing",
+        "--output-dir",
+        ".playwright-mcp"
+      ]
+    }
+  }
+}

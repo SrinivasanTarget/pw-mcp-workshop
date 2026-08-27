@@ -1,0 +1,14 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "WebFetch(domain:playwright.dev)"
+    ],
+    "deny": [
+      "mcp__playwright__browser_run_code_unsafe"
+    ]
+  }
+}

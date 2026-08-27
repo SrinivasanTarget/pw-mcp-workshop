@@ -28,6 +28,15 @@ Deployed at **https://playwright-workshop.pages.dev** (`baseURL`; override with
   `getByTestId('username')` resolves to `[data-test="username"]`.
 - Known planted bug: the **Desk Lamp** product image 404s.
 
+## MCP (this stage)
+
+One MCP server is wired for both clients: the general **`playwright`** server
+(`npx playwright mcp`, bundled with Playwright 1.62) - `.mcp.json` for Claude
+Code, `opencode.json` for OpenCode. It is a raw browser driver: no setup
+ceremony, `browser_navigate` works immediately. `browser_run_code_unsafe` is
+denied by policy. When asked to explore or verify the app, prefer `browser_*`
+tools over guessing from source.
+
 ## Repo conventions
 
 - `tests/fixtures.ts` extends `test` with an auto network-evidence fixture;
