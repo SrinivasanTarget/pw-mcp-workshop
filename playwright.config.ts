@@ -38,9 +38,15 @@ export default defineConfig({
   },
 
   projects: [
+    /* Signs in once and saves playwright/.auth/user.json for storageState. */
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
     // Uncomment to broaden coverage during the workshop:
     // { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
