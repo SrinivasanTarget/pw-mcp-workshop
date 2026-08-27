@@ -10,7 +10,7 @@ test.describe('Guest Checkout', () => {
     await page.getByRole('link', { name: /^Cart/ }).click();
 
     // Check out with a complete address
-    await page.getByTestId('checkout-btn').click();
+    await page.getByTestId('checkout').click();
     await page.getByTestId('firstName').fill('Ada');
     await page.getByTestId('lastName').fill('Lovelace');
     await page.getByTestId('zip').fill('00001');
