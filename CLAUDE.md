@@ -73,6 +73,16 @@ the MCP for quick one-off pokes and for scripted, repeatable sessions
 this repo pass CSS `[data-test=...]` selectors or roles/labels - the
 standalone CLI does not read `testIdAttribute` from the config.
 
+## LangGraph pipeline (this stage)
+
+`langgraph-agent/` is a standalone LangGraph.js pipeline: Jira ticket (or
+`TICKET_FILE` offline ticket) → structured test plan → generated specs via
+the general Playwright MCP, reusing `.claude/agents/playwright-test-generator.md`
+as its system prompt - so never rename those agent files. It needs
+`ANTHROPIC_API_KEY` (see `langgraph-agent/.env.example`). Its `npm run heal`
+counterpart repairs failing specs through the `playwright-test` MCP. Both run
+one browser at a time - never parallelize their nodes.
+
 ## Repo conventions
 
 - `tests/fixtures.ts` extends `test` with an auto network-evidence fixture;

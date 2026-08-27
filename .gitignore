@@ -18,3 +18,8 @@ node_modules/
 
 # Playwright CLI scratch (sessions, snapshots)
 .playwright-cli/
+
+# Self-healing artifacts (langgraph-agent heal runs)
+/heal-summary.md
+/heal-meta.json
+langgraph-agent/.env
