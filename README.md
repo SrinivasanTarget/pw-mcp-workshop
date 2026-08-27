@@ -22,6 +22,7 @@ previous stage's solution, so you can always fast-forward.
 | 3 | `03-mcp-skills` | `03-mcp-skills-solution` | Skills: teach the agent your house style, refactor with it |
 | 4 | `04-pw-agents` | `04-pw-agents-solution` | Test Agents: planner → generator → healer |
 | 5 | `05-pw-cli` | `05-pw-cli-solution` | The Playwright CLI for agents and terminals |
+| 6 | `06-langgraph-jira` | `06-langgraph-jira-solution` | Finale: a LangGraph pipeline - Jira ticket → plan → generated specs (+ self-heal) |
 
 Work a stage like this:
 
