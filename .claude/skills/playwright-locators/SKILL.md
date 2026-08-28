@@ -16,9 +16,10 @@ Most "flaky" Playwright tests fight the browser instead of describing user inten
 2. `getByLabel(text)` - form fields
 3. `getByPlaceholder(text)` - when no label
 4. `getByText(text)` - non-interactive copy
-5. `getByTestId(id)` - explicit contract. **This app tags elements with
-   `data-test`**, and `playwright.config.ts` sets `testIdAttribute: 'data-test'`,
-   so `getByTestId('username')` resolves to `[data-test="username"]`.
+5. `getByTestId(id)` - explicit contract. Before assuming `data-testid`, check
+   `testIdAttribute` in `playwright.config.ts` - projects often remap it (e.g. to
+   `data-test` or `data-qa`), and `getByTestId` resolves against whatever is
+   configured.
 6. ❌ Long CSS chains / positional XPath - selector rot
 
 ## Auto-wait rules
@@ -32,10 +33,10 @@ Most "flaky" Playwright tests fight the browser instead of describing user inten
 
 ```ts
 await expect(locator).toBeVisible();
-await expect(locator).toHaveText('Products');
+await expect(locator).toHaveText('Dashboard');
 await expect(locator).toContainText('$39.95');
 await expect(locator).toHaveCount(6);
-await expect(page).toHaveURL(/\/inventory$/);
+await expect(page).toHaveURL(/\/dashboard$/);
 ```
 
 ## Filter lists, don't index
@@ -45,14 +46,12 @@ const card = page.locator('main > div')
   .filter({ has: page.getByRole('heading', { name, level: 3 }) });
 ```
 
-You'll build the real version as a small query helper that returns this filtered
-Locator (never `.nth()`), so `expect` keeps auto-waiting - see [[test-craftsmanship]]
-for where such helpers live.
+When a list query repeats across specs, extract it as a small helper that returns
+the filtered Locator (never `.nth()`), so `expect` keeps auto-waiting - see
+[[test-craftsmanship]] for where such helpers live.
 
 ## Common failure modes
 
 - **Strict-mode violation** → locator matched >1 element. Narrow with `{ name }`, not `.first()`.
 - **"Not visible"** → page hasn't navigated. Anchor with `await expect(...).toBeVisible()` first.
 - **Login flake** → wait on the *next* page's URL/heading, not a spinner.
-
-Workshop exercises in `WORKSHOP_GUIDE.md`.

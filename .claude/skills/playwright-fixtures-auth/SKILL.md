@@ -5,20 +5,21 @@ description: Build custom Playwright fixtures, skip repeated login with storage 
 
 # Fixtures, auth & test isolation
 
-`tests/fixtures.ts` already injects an `app` facade - that *is* Dependency Injection
-(see [[test-craftsmanship]]). During the workshop you build on it:
-- an **authenticated** `app` fixture, composed on top of the base `app`
-- a storage-state reuse test across isolated contexts
+A fixture that injects a collaborator into a test *is* Dependency Injection
+(see [[test-craftsmanship]]): the spec names what it needs, the fixture supplies it.
+Typical build-out: a base fixture for the app's entry point, then an
+**authenticated** variant composed on top of it.
 
-> This app's login is **client-side** - the session lives in `localStorage`, not a
-> cookie. `storageState` captures localStorage + origins too, so it still works;
-> just don't expect a `session` cookie.
+> Before designing auth reuse, find out where the session actually lives. It is
+> not always a cookie - some apps keep it in `localStorage`. `storageState`
+> captures cookies **and** localStorage/origins, so the pattern works either way;
+> just verify what the saved file contains.
 
 ## Fixtures > `beforeEach`
 
 - Run only for tests that ask for the fixture (named parameter destructuring).
 - Return a typed value via `use()`; teardown after `use`.
-- Compose: a fixture can depend on other fixtures (e.g. an authenticated `app` that builds on the base `app`).
+- Compose: a fixture can depend on other fixtures (e.g. an authenticated fixture that builds on the base one).
 
 ## Isolation contract
 
@@ -46,12 +47,10 @@ const context = await browser.newContext({ storageState: 'playwright/.auth/user.
 | Most tests need the same logged-in user | `globalSetup` + `use.storageState` in config |
 | Multiple user types | One storage file per user + `test.use({ storageState })` |
 | Test is *about* login | No storage state - start fresh |
-| One or two tests share login | A composed fixture (an authenticated `app`) |
+| One or two tests share login | A composed authenticated fixture |
 
 ## Pitfalls
 
 - **Auth file missing in CI** → generate via `globalSetup`; commit a `.gitkeep`, never real credentials.
 - **Token expired** → regenerate in `globalSetup` per run.
 - **Leaked state between tests** → storage state loads at context creation; mutations don't persist back. Good.
-
-Workshop exercises in `WORKSHOP_GUIDE.md`.

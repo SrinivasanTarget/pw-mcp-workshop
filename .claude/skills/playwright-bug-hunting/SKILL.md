@@ -7,10 +7,9 @@ description: Use Playwright as an investigation tool, not just a regression suit
 
 A regression test asks "did we break what we know about?" A bug hunt asks "what's broken that we don't know about?"
 
-Live target in this app: the **Desk Lamp** product on `/inventory` has a genuinely
-broken image (its `src` points at a 404). Write the broken-image audit below and it
-finds that bug with no explicit knowledge of it. See the exercise in
-`WORKSHOP_GUIDE.md`.
+The patterns below assert on **invariants** ("no broken images", "no console
+errors", "no 5xx") rather than known facts, so they surface bugs nobody has filed
+a ticket for yet.
 
 ## Patterns that find real bugs
 
@@ -49,9 +48,9 @@ page.on('response', r => {
 ### Negative paths
 
 For every form ask: empty input? wrong password? locked / suspended / trial-expired
-user? Most bugs hide in unhappy branches. In this app, try `locked_out_user`
-(password `workshop123`): it should *not* reach `/inventory`. Assert that it stays
-on `/login`.
+user? Most bugs hide in unhappy branches. If the app has restricted account states,
+assert the *denial*: a locked account should stay on the login page with an error,
+never reach the authenticated area.
 
 ### Accessibility scan
 
@@ -72,5 +71,3 @@ expect(results.violations).toEqual([]);
 ## Network mocking for bug-hunting
 
 Forcing empty states, errors, slow responses - see `[[playwright-network-mocking]]`. Use it to make hard-to-reproduce bugs reproducible.
-
-Workshop exercises in `WORKSHOP_GUIDE.md`.
