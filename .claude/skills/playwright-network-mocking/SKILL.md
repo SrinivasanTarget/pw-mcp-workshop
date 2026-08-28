@@ -25,12 +25,13 @@ Routes registered later run first.
 ## Stub a response
 
 ```ts
-// This app's GET /api/products returns { products: [...] }, so stub that shape.
-await page.route('**/api/products', route =>
+// Capture one real response first and stub the same shape - a stub with the
+// wrong shape tests nothing.
+await page.route('**/api/articles', route =>
   route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({ products: [] }),
+    body: JSON.stringify({ articles: [] }),
   })
 );
 ```
@@ -39,10 +40,10 @@ await page.route('**/api/products', route =>
 
 ```ts
 // Tweak a real response
-await page.route('**/api/products', async route => {
+await page.route('**/api/articles', async route => {
   const response = await route.fetch();
   const json = await response.json();
-  json[0].price = '$0.00';
+  json.articles[0].title = 'A very long title that should still wrap cleanly';
   await route.fulfill({ response, json });
 });
 ```
@@ -52,11 +53,11 @@ await page.route('**/api/products', async route => {
 ```ts
 // Record
 const context = await browser.newContext({
-  recordHar: { path: 'tests/har/inventory.har', mode: 'full' },
+  recordHar: { path: 'tests/har/third-party.har', mode: 'full' },
 });
 
 // Replay (in another test/run)
-await page.routeFromHAR('tests/har/inventory.har', { url: '**/api/**', update: false });
+await page.routeFromHAR('tests/har/third-party.har', { url: '**/api/**', update: false });
 ```
 
 Use for **third-party** dependencies. Don't HAR your own backend - stale HARs give false confidence.
@@ -87,8 +88,6 @@ Per-test routes run before fixture-scoped ones (later registration wins). See `[
 
 - **Routes leak between tests** - register on `page` (fixture-scoped) or `unroute` in teardown.
 - **Mocking your own backend everywhere** → you're testing your mocks. Mock third parties; keep some real end-to-ends.
-- **`**/api/products` over-matches** - also hits `/api/products/123`. Use `page.route(/\/api\/products$/, ...)`.
+- **`**/api/articles` over-matches** - also hits `/api/articles/123`. Use `page.route(/\/api\/articles$/, ...)`.
 - **Forgot `await` on `route.fulfill`** - test moves on before response is set.
 - **Stale HAR** - regenerate quarterly; CI diff vs. real contract.
-
-Workshop exercises in `WORKSHOP_GUIDE.md`.
