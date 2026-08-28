@@ -18,14 +18,15 @@ Time-travel DOM snapshots per step, file watcher, locator picker. Replaces 90% o
 ## 2. `codegen` - discover a locator
 
 ```bash
-npx playwright codegen https://playwright-workshop.pages.dev/login
+npx playwright codegen <url-of-the-page-under-test>
 ```
 
 Click in the browser → it writes the test. Treat output as a **starting point**, not a commit. It often picks brittle text or `nth(n)`.
 
 ## 3. Trace viewer - for "why did CI fail"
 
-This repo's config sets `trace: 'on-first-retry'`. View a saved trace:
+Check the `trace` setting in `playwright.config.ts` (commonly `'on-first-retry'`).
+View a saved trace:
 
 ```bash
 npx playwright show-trace test-results/.../trace.zip
