@@ -1,25 +1,28 @@
 ---
 name: test-craftsmanship
-description: The house craft for this repo - SOLID, DRY, clean code, the Dependency Rule, code smells, and design-pattern discipline (Uncle Bob's canon) applied to test automation for UI and API. Read when writing, refactoring, or reviewing test code, or deciding how much structure a framework needs. Explains why we reject the Page Object Model and use lightweight functional helpers instead.
+description: SOLID, DRY, clean code, the Dependency Rule, code smells, and design-pattern discipline (Uncle Bob's canon) applied to test automation for UI and API. Use when writing, refactoring, or reviewing test code, or deciding how much structure a suite needs. Explains why lightweight functional helpers beat the Page Object Model.
 ---
 
 # Test craftsmanship
 
 Test code is production code. It is read far more than it is written, it outlives the
 features it covers, and a flaky or unreadable suite erodes trust faster than no suite
-at all. So we hold it to the same bar as the app.
+at all. So hold it to the same bar as the app.
 
 This skill aggregates Robert C. Martin's craft - Clean Code, Clean Architecture, The
 Clean Coder, Clean Agile, and design-pattern discipline - and applies it to tests. It
 is about **structure and design, not syntax**: naming style, line length, and
-formatting stay the job of the linter/formatter, not this skill. (Adapted from Uncle
-Bob's books and the community `uncle-bob-craft` skill.)
+formatting stay the job of the linter/formatter, not this skill.
+
+The principles are application-agnostic. Where an example names a flow (sign-in,
+form submission), that is illustration only - apply the same move to whatever flows
+the suite in front of you actually repeats.
 
 ## Clean code, applied to tests
 
-- **Names reveal intent.** A test title states a behaviour ("standard_user can sign
-  in"), not a mechanic ("test1"). A helper is a business verb (`login`, `addToCart`),
-  never `doStuff`.
+- **Names reveal intent.** A test title states a behaviour ("rejects an expired
+  card"), not a mechanic ("test1"). A helper is a business verb from the app's own
+  domain (`signIn`, `submitOrder`, `archiveReport`), never `doStuff`.
 - **Small things that do one thing.** If you can extract another meaningful step from a
   function, it was doing two. Extract until you can't.
 - **Few arguments.** 0-2 is comfortable, 3 is a smell, more wants an object. Never a
@@ -38,20 +41,20 @@ Bob's books and the community `uncle-bob-craft` skill.)
 
 ## SOLID, in context
 
-| Principle | In this repo |
+| Principle | In test automation |
 |---|---|
-| **SRP** - one reason to change | `loginAs` owns the login flow; one helper owns one endpoint or one flow. A login-screen change touches one file. |
+| **SRP** - one reason to change | One helper owns one flow or one endpoint. When that screen or endpoint changes, exactly one file changes. |
 | **OCP** - open to extension | Add a new action/query as a new function; you stop editing an ever-growing god-object. |
-| **LSP** - substitutability | Anything typed `App` works anywhere an `App` is expected - including a future authenticated variant. |
-| **ISP** - small interfaces | API helpers take the narrow `APIRequestContext`, not the whole `App`. Depend on exactly what you use. |
-| **DIP** - depend on abstractions | Actions depend on the `App` facade, not on raw Playwright globals. The concrete `page`/`request` are injected in `tests/fixtures.ts`. |
+| **LSP** - substitutability | Any implementation of a helper interface works wherever the interface is expected - including an authenticated variant. |
+| **ISP** - small interfaces | API helpers take the narrow `APIRequestContext`, not a whole app facade. Depend on exactly what you use. |
+| **DIP** - depend on abstractions | Specs depend on intent-named helpers; the concrete `page`/`request` are injected through fixtures, not imported globals. |
 
 ## The Dependency Rule (Clean Architecture)
 
-Dependencies point **inward**. Business intent (the `login` action, the products
-client) is the center; the Playwright driver is a detail at the edge, wrapped by the
-`App` facade. Specs and actions never reach past the facade to poke `page` globals,
-so swapping how we reach the browser or API changes one seam, not the suite.
+Dependencies point **inward**. Business intent (the sign-in action, an API client)
+is the center; the Playwright driver is a detail at the edge, hidden behind the
+helper layer. Specs never reach past that layer to poke `page` plumbing directly,
+so swapping how you reach the browser or API changes one seam, not the suite.
 
 ## Code smells (name them in review)
 
@@ -67,24 +70,25 @@ so swapping how we reach the browser or API changes one seam, not the suite.
 
 In a review, **name the smell with its file/function and propose one or two concrete
 refactors** ("SRP: this parses and asserts - split it", "invert this so the spec
-depends on the facade, not `page`"). "Violates SOLID" with no location or fix is not
+depends on the helper, not `page`"). "Violates SOLID" with no location or fix is not
 a review.
 
 ## Design patterns: use vs misuse
 
 - Introduce a pattern when a **real** design need appears - roughly the *third
   duplication* or the *second reason to change* - and name it so intent is clear.
-- **Avoid cargo cult.** Don't add a Factory/Strategy/Screenplay layer because the repo
+- **Avoid cargo cult.** Don't add a Factory/Strategy/Screenplay layer because a suite
   "should" have one. Signs of misuse: a pattern name in every file, layers that only
   delegate without logic, abstraction that makes simple code harder to follow (the
   *needless complexity* smell).
-- **Why this repo uses plain functions.** For today's small suite, a `login` function
-  plus a thin `App` facade is enough and reads clearly. The **Screenplay pattern**
-  (Actors/Abilities/Tasks/Questions) is the principled next step *if* this grows a
-  second axis of change - many reused flows across a broad UI **and** API surface. We
-  don't build it speculatively; that would be the smell, not the cure.
+- **Plain functions first.** For a small suite, a handful of intent-named functions
+  reads clearly and is enough. A facade comes when helpers start needing shared
+  state; the **Screenplay pattern** (Actors/Abilities/Tasks/Questions) is the
+  principled step after *that*, if a second axis of change appears - many reused
+  flows across a broad UI **and** API surface. Never build either speculatively;
+  that would be the smell, not the cure.
 
-## Why we do NOT use the Page Object Model
+## Why NOT the Page Object Model
 
 The POM is the industry default, and it fights the principles above:
 
@@ -104,24 +108,37 @@ seeds state through the API (fast, reliable) and asserts through the UI. The pri
 don't change between UI and API - only the collaborator does ([[playwright-api-testing]],
 [[playwright-fixtures-auth]]).
 
-## This repo's shape
+## Shape of a lean suite
 
 ```
-tests/support/       business-intent helpers (loginAs, ...); one thing each, reused (DRY)
-tests/fixtures.ts    extends test with cross-cutting fixtures (network evidence) (DI)
-tests/**/*.spec.ts   read as intent; assertions web-first, in the spec
+tests/support/       intent-named helpers; one thing each, reused (DRY)
+tests/fixtures.ts    extends test with cross-cutting fixtures (the DI seam)
+tests/**/*.spec.ts   read as intent; web-first assertions live here, in the open
 ```
 
-The `tests/checkout/` specs started life as raw generated locator chains - the
-stage 03 exercise is refactoring them toward this shape. Grow structure only as
-duplication justifies it: a `tests/support/` function first; a facade only if
-helpers start needing shared state.
+Grow structure only as duplication justifies it: a support function first; a facade
+only if helpers start needing shared state.
+
+## Refactoring workflow
+
+The common failure when refactoring a suite is stopping after the first obvious
+extraction. The inventory step is what makes the refactor complete:
+
+1. **Inventory the whole suite first.** Before touching code, read every spec and
+   list all duplication: repeated flows (sign-in, navigation, data setup,
+   multi-step form submissions), repeated locators, repeated magic values.
+2. **Extract every repeated flow** into an intent-named helper - not just the first
+   one you notice. Each item on the inventory either becomes a helper or gets a
+   reason to stay inline.
+3. **Replace brittle locators** per the priority in [[playwright-locators]].
+4. **Keep assertions in the specs**, web-first, never hidden inside a helper.
+5. **Re-run the type check and the tests** after each extraction, not only at the end.
 
 ## Craft checklist (before you push a test)
 
 - Does the spec read as intent, with no raw locators or `page.` plumbing?
 - Is each new function one responsibility, one reason to change?
-- Did a duplicated flow become a shared function, not a copy-paste?
+- Did *every* duplicated flow become a shared function, not just the first?
 - Are all assertions web-first, and none hiding inside an action?
 - Would this still work if you swapped the UI for the API surface?
 - Did you add structure only where duplication/variation justified it (no cargo cult)?
